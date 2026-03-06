@@ -13,35 +13,36 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @CrossOrigin(origins = "*")
-public class UserController 
-{
+public class UserController {
     @Autowired
     UserRepository userRepo;
 
     @GetMapping("/demo")
-    String demo()
-    {
+    String demo() {
         return "Iam good how are you..";
     }
 
     @GetMapping("/users")
-public List<Users> getAllUsers() 
-{
-    return this.userRepo.findAll();
-}
+    public List<Users> getAllUsers() {
+        return this.userRepo.findAll();
+    }
 
-  @PostMapping("/register")
-    public ResponseEntity<String> register( @RequestBody Users user) 
-    {
-        Users u=this.userRepo.findByEmail(user.getEmail());
-        if (u!=null) {
-             return ResponseEntity.status(HttpStatus.CONFLICT).body("Email already exists");
-            //   throw new RuntimeException("Email already exists");
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody Users user) {
+        Users foundUser = this.userRepo.findByEmail(user.getEmail());
+        if (foundUser != null && foundUser.getPassword().equals(user.getPassword())) {
+            return ResponseEntity.ok(foundUser);
         }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
+    }
 
-        
+    @PostMapping("/register")
+    public ResponseEntity<String> register(@RequestBody Users user) {
+        Users u = this.userRepo.findByEmail(user.getEmail());
+        if (u != null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email already exists");
+        }
         this.userRepo.save(user);
         return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
     }
 }
-
